@@ -34,7 +34,7 @@ See this [article](https://www.sciencedirect.com/science/article/pii/S0167642313
 1. See target model from your source model in model folder (Open each model with **sample reflective ecore model editor**)
 
 ## need help/more?
-download this [pdf](https://panikoweb.ir/Me&MrShams/Model-Refactoring-ATL.pdf), and take a quite look!
+download this [pdf](https://drive.google.com/uc?export=view&id=1pQhd7gzpD19IH-SLwiLnvK5diGYbndce), and take a quite look!
 
 @ModelRefactoring 2020 :100: by [@Mr-talebi]() and [@Mr-Shams]()
 > [University of isfahan](https://ui2.ui.ac.ir/)
