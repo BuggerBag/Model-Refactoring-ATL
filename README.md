@@ -5,16 +5,16 @@
 <img src="https://drive.google.com/uc?export=view&id=1BkZ18p8xAfZDCP6rOgpG5MVkqT0ACB_H" width="180">
 
 - [x] we have **many classes** that **two classes of them** have same **one or more common property**, all of the classes have **same parent class** in our model, /_see figure below_/   (this is **issue 2**)
-<img src="https://drive.google.com/uc?export=view&id=1tOYclOtvs3LJr-8S566HgsOfGXWYgG_1" width="350">
+<img src="" width="350">
 
 - [x] we have **many root classes** that **two classes of them** have same **one or more common property**, /_see figure below_/ (this is **issue 3**)
-<img src="https://panikoweb.ir/Me&MrShams/3-i.jpg" width="350">
+<img src="" width="350">
 
 See this [article](https://www.sciencedirect.com/science/article/pii/S0167642313001871) for more information
 ### So you've got to know the story so far / what's the solution?
 - [x] **solution for issue 1**: at first, search and find those **same properties** of **both classes**, then move these **same properties** to **same parent class**, /_see figure below_/ (this is **Rule 1**) 
 -*maybe we have more than two classes!(another senario)
-<img src="https://panikoweb.ir/Me&MrShams/1-sol.jpg" width="350">
+<img src="https://drive.google.com/uc?export=view&id=1tOYclOtvs3LJr-8S566HgsOfGXWYgG_1" width="350">
 
 - [x] **soultion for issue 2**: at first, find **classes** that have **common properties**, create **one middle class** for **each classes that ever have one or more common properties**, this properties must move to **middle class** /_see figure below_/ (this is **Rule 2**)  
 -*Generalisation link must be created carefully
