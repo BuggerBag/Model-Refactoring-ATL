@@ -5,10 +5,10 @@
 <img src="https://drive.google.com/uc?export=view&id=1BkZ18p8xAfZDCP6rOgpG5MVkqT0ACB_H" width="180">
 
 - [x] we have **many classes** that **two classes of them** have same **one or more common property**, all of the classes have **same parent class** in our model, /_see figure below_/   (this is **issue 2**)
-<img src="" width="350">
+<img src="https://drive.google.com/uc?export=view&id=13tIcab4dHz4ijQjIDXaBuFIkdAmbi0vC" width="350">
 
 - [x] we have **many root classes** that **two classes of them** have same **one or more common property**, /_see figure below_/ (this is **issue 3**)
-<img src="" width="350">
+<img src="https://drive.google.com/uc?export=view&id=1Zzyuuv4ZQ_6lci4oIbpiP2cglkcIgkUU" width="350">
 
 See this [article](https://www.sciencedirect.com/science/article/pii/S0167642313001871) for more information
 ### So you've got to know the story so far / what's the solution?
@@ -18,11 +18,11 @@ See this [article](https://www.sciencedirect.com/science/article/pii/S0167642313
 
 - [x] **soultion for issue 2**: at first, find **classes** that have **common properties**, create **one middle class** for **each classes that ever have one or more common properties**, this properties must move to **middle class** /_see figure below_/ (this is **Rule 2**)  
 -*Generalisation link must be created carefully
-<img src="https://panikoweb.ir/Me&MrShams/2-sol.jpg" width="710">
+<img src="https://drive.google.com/uc?export=view&id=1xgWdeCK2UnSwb0n0J-F35-a5yC7YqiGp" width="710">
 
 - [x] **solution for issue 3**: af first, find **classes** that have **common properties**, create **one root class** for all of **these**, then move properies must be done. /_see figure below_/ (this is **Rule 3**)
 -*Generalisation link must be created.
-<img src="https://panikoweb.ir/Me&MrShams/3-sol.jpg" width="700">
+<img src="https://drive.google.com/uc?export=view&id=1lkw419Fu1t1iMWIWgOyFnSpG0rDgy8Cm" width="700">
 
 
 ## How to Use?
