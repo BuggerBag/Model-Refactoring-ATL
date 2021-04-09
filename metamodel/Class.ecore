@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="Class" nsURI="www.Class.com" nsPrefix="www.Class.com">
+  <eClassifiers xsi:type="ecore:EClass" name="Entity" eSuperTypes="#//NamedElement">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="Owned_Attribute" upperBound="-1"
+        eType="#//Property" eOpposite="#//Property/owned2"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="generalisation" upperBound="-1"
+        eType="#//Generalization" eOpposite="#//Generalization/specific"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="specialisation" upperBound="-1"
+        eType="#//Generalization" eOpposite="#//Generalization/general"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Property" eSuperTypes="#//NamedElement">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="type" eType="#//Type" eOpposite="#//Type/type2"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="owned2" upperBound="-1"
+        eType="#//Entity" eOpposite="#//Entity/Owned_Attribute"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Type" eSuperTypes="#//NamedElement">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="type2" upperBound="-1"
+        eType="#//Property" eOpposite="#//Property/type"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Generalization">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="specific" eType="#//Entity"
+        eOpposite="#//Entity/generalisation"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="general" eType="#//Entity"
+        eOpposite="#//Entity/specialisation"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="NamedElement">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Container">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="NE" upperBound="-1" eType="#//NamedElement"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="gr" upperBound="-1" eType="#//Generalization"
+        containment="true"/>
+  </eClassifiers>
+</ecore:EPackage>
