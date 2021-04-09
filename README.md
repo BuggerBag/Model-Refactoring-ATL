@@ -2,7 +2,7 @@
 ### Sometimes in models, there are conditions that we have to use Model Refactoring, these conditions are as follows 
 
 - [x] we have **two classes** that have same **one or more common property**, this two classes have **same parent class** in our model, /_see figure below_/  (this is **issue 1**) 
-<img src="https://drive.google.com/file/d/1BkZ18p8xAfZDCP6rOgpG5MVkqT0ACB_H/view?usp=sharing" width="180">
+<img src="https://doc-14-94-docs.googleusercontent.com/docs/securesc/jh8i4n1034qocv9rio8ar5oeaghn985r/h8juoo8l91n4k87k5c421eufk9ovc6ae/1617958050000/15251331871927021920/15251331871927021920/1BkZ18p8xAfZDCP6rOgpG5MVkqT0ACB_H?e=download&authuser=0&nonce=7q52gbvrljaum&user=15251331871927021920&hash=g5b5q2n75r0h4tnutp98a94a5etmskj9" width="180">
 
 - [x] we have **many classes** that **two classes of them** have same **one or more common property**, all of the classes have **same parent class** in our model, /_see figure below_/   (this is **issue 2**)
 <img src="https://panikoweb.ir/Me&MrShams/2-i.jpg" width="350">
