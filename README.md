@@ -5,7 +5,7 @@
 <img src="https://drive.google.com/uc?export=view&id=1BkZ18p8xAfZDCP6rOgpG5MVkqT0ACB_H" width="180">
 
 - [x] we have **many classes** that **two classes of them** have same **one or more common property**, all of the classes have **same parent class** in our model, /_see figure below_/   (this is **issue 2**)
-<img src="https://panikoweb.ir/Me&MrShams/2-i.jpg" width="350">
+<img src="https://drive.google.com/uc?export=view&id=1tOYclOtvs3LJr-8S566HgsOfGXWYgG_1" width="350">
 
 - [x] we have **many root classes** that **two classes of them** have same **one or more common property**, /_see figure below_/ (this is **issue 3**)
 <img src="https://panikoweb.ir/Me&MrShams/3-i.jpg" width="350">
