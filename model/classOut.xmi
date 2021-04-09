@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<www.Class.com:Container xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:www.Class.com="www.Class.com">
+  <NE xsi:type="www.Class.com:Type" name="CopyType.t" type2="//@NE.1 //@NE.2 //@NE.3 //@NE.4 //@NE.5 //@NE.6 //@NE.7 //@NE.8"/>
+  <NE xsi:type="www.Class.com:Property" name="CopyProperty.ab1" type="//@NE.0" owned2="//@NE.14"/>
+  <NE xsi:type="www.Class.com:Property" name="CopyProperty.ab2" type="//@NE.0" owned2="//@NE.14"/>
+  <NE xsi:type="www.Class.com:Property" name="CopyProperty.abc" type="//@NE.0" owned2="//@NE.12"/>
+  <NE xsi:type="www.Class.com:Property" name="CopyProperty.c" type="//@NE.0" owned2="//@NE.11"/>
+  <NE xsi:type="www.Class.com:Property" name="CopyProperty.ce" type="//@NE.0" owned2="//@NE.11 //@NE.13"/>
+  <NE xsi:type="www.Class.com:Property" name="CopyProperty.de1" type="//@NE.0" owned2="//@NE.15"/>
+  <NE xsi:type="www.Class.com:Property" name="CopyProperty.de2" type="//@NE.0" owned2="//@NE.15"/>
+  <NE xsi:type="www.Class.com:Property" name="CopyProperty.d" type="//@NE.0" owned2="//@NE.12"/>
+  <NE xsi:type="www.Class.com:Entity" name="CopyEntity.A" generalisation="//@gr.3"/>
+  <NE xsi:type="www.Class.com:Entity" name="CopyEntity.B" generalisation="//@gr.2"/>
+  <NE xsi:type="www.Class.com:Entity" name="CopyEntity.C" Owned_Attribute="//@NE.5 //@NE.4" generalisation="//@gr.0"/>
+  <NE xsi:type="www.Class.com:Entity" name="CopyEntity.D" Owned_Attribute="//@NE.3 //@NE.8" generalisation="//@gr.4" specialisation="//@gr.0 //@gr.1"/>
+  <NE xsi:type="www.Class.com:Entity" name="CopyEntity.E" Owned_Attribute="//@NE.5" generalisation="//@gr.5"/>
+  <NE xsi:type="www.Class.com:Entity" name="common.BA.ab1.ab2" Owned_Attribute="//@NE.1 //@NE.2" generalisation="//@gr.1" specialisation="//@gr.2 //@gr.3"/>
+  <NE xsi:type="www.Class.com:Entity" name="common.DE.de1.de2" Owned_Attribute="//@NE.6 //@NE.7" specialisation="//@gr.4 //@gr.5"/>
+  <gr name="CopyEntity.C --|> CopyEntity.D" specific="//@NE.11" general="//@NE.12"/>
+  <gr name="common.BA.ab1.ab2 --|> CopyEntity.D" specific="//@NE.14" general="//@NE.12"/>
+  <gr name="CopyEntity.B --|> common.BA.ab1.ab2" specific="//@NE.10" general="//@NE.14"/>
+  <gr name="CopyEntity.A --|> common.BA.ab1.ab2" specific="//@NE.9" general="//@NE.14"/>
+  <gr name="CopyEntity.D --|> common.DE.de1.de2" specific="//@NE.12" general="//@NE.15"/>
+  <gr name="CopyEntity.E --|> common.DE.de1.de2" specific="//@NE.13" general="//@NE.15"/>
+</www.Class.com:Container>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<www.Class.com:Container xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:www.Class.com="www.Class.com">
+  <NE xsi:type="www.Class.com:Type" name="CopyType.t" type2="//@NE.1 //@NE.2 //@NE.3 //@NE.4"/>
+  <NE xsi:type="www.Class.com:Property" name="CopyProperty.n" type="//@NE.0" owned2="//@NE.5"/>
+  <NE xsi:type="www.Class.com:Property" name="CopyProperty.m" type="//@NE.0" owned2="//@NE.7"/>
+  <NE xsi:type="www.Class.com:Property" name="CopyProperty.z" type="//@NE.0" owned2="//@NE.5"/>
+  <NE xsi:type="www.Class.com:Property" name="CopyProperty.K" type="//@NE.0" owned2="//@NE.8"/>
+  <NE xsi:type="www.Class.com:Entity" name="CopyEntity.C" Owned_Attribute="//@NE.1 //@NE.3" specialisation="//@gr.0 //@gr.1"/>
+  <NE xsi:type="www.Class.com:Entity" name="CopyEntity.A" generalisation="//@gr.0"/>
+  <NE xsi:type="www.Class.com:Entity" name="CopyEntity.B" Owned_Attribute="//@NE.2" generalisation="//@gr.1"/>
+  <NE xsi:type="www.Class.com:Entity" name="CopyEntity.D" Owned_Attribute="//@NE.4"/>
+  <gr name="CopyEntity.A --|> CopyEntity.C" specific="//@NE.6" general="//@NE.5"/>
+  <gr name="CopyEntity.B --|> CopyEntity.C" specific="//@NE.7" general="//@NE.5"/>
+</www.Class.com:Container>

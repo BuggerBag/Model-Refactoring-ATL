@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<www.Class.com:Container
+    xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:www.Class.com="www.Class.com"
+    xsi:schemaLocation="www.Class.com /Class2Class-Refactoring-GitHub/metamodel/Class.ecore">
+  <NE xsi:type="www.Class.com:Entity"
+      name="C"
+      Owned_Attribute="//@NE.5"
+      specialisation="//@gr.0 //@gr.1"/>
+  <NE xsi:type="www.Class.com:Entity"
+      name="A"
+      Owned_Attribute="//@NE.3"
+      generalisation="//@gr.0"/>
+  <NE xsi:type="www.Class.com:Entity"
+      name="B"
+      Owned_Attribute="//@NE.3"
+      generalisation="//@gr.1"/>
+  <NE xsi:type="www.Class.com:Property"
+      name="n"
+      type="//@NE.4"
+      owned2="//@NE.1 //@NE.2"/>
+  <NE xsi:type="www.Class.com:Type"
+      name="t"
+      type2="//@NE.3 //@NE.5"/>
+  <NE xsi:type="www.Class.com:Property"
+      name="z"
+      type="//@NE.4"
+      owned2="//@NE.0"/>
+  <gr specific="//@NE.1"
+      general="//@NE.0"/>
+  <gr specific="//@NE.2"
+      general="//@NE.0"/>
+</www.Class.com:Container>
