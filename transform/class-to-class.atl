@@ -1,0 +1,399 @@
+-- @path Class=/Class2Class-Refactoring-GitHub/metamodel/Class.ecore
+ 
+module class_to_class;
+
+create OUT: Class from IN: Class;
+
+helper def: debugMode: Boolean = false;
+
+helper def: c: Class!Container = OclUndefined; -- input container fetch in
+
+helper def: cOut: Class!Container = OclUndefined; -- output container
+
+helper def: ee: Map(Class!Entity, Class!Entity) 
+	= Map{}; -- I take it a Entity & get me the coresponding entity {I take with "get" Method}
+
+helper def: pp: Map(Class!Property, Class!Property) 
+	= Map{}; -- I take it a Property & get me the coresponding Property {I take with "get" Method}
+
+helper def: tt: Map(Class!Type, Class!Type) 
+	= Map{}; -- I take it a Type & get me the coresponding Type {I take with "get" Method}
+
+helper def: g: OrderedSet(TupleType(
+		parent:Class!Entity
+		,parents:OrderedSet(Class!Entity)
+		,parentsProperty:OrderedSet(Class!Property)
+		,commons:OrderedSet(TupleType(
+			property:Class!Property
+			,owners:OrderedSet(Class!Entity))))) =
+	OrderedSet {};
+
+		--               +--------------+           
+		--               + OclUndefined +           
+		--               +--------------+           
+		--              /                \           
+		--      +-------------+        +-----+
+		--      |      D      |        |  E  |
+		--      |-------------|        |-----|
+		--      |     de1     |        | de1 |
+		--      |     de2     |        | de2 |
+		--      |      d      |        | ce  |
+		--      +-------------+        +-----+
+		--     /       |       \           
+		-- +-----+  +-----+  +-----+    
+		-- |  A  |  |  B  |  |  C  |    
+		-- |-----|  |-----|  |-----|   
+		-- | ab1 |  | ab1 |  |  c  |      
+		-- | ab2 |  | ab2 |  |  ce |
+		-- | abc |  | abc |  | abc |
+		-- +-----+  +-----+  +-----+
+		--
+		-- +---+--------------------------------------------------------------+
+		-- | g | parent       parents parentsProperty commons==childsProperty |
+		-- +---+--------------------------------------------------------------+
+		-- |[1]| D            {D}     {de1,de2}       +---+-----------------+ |
+		-- |   |                                      | \ | property owners | |
+		-- |   |                                      +---+-----------------+ |
+		-- |   |                                      |[1]| ab1      {A,B}  | |
+		-- |   |                                      |[2]| ab2      {A,B}  | |
+		-- |   |                                      |[3]| abc      {A,B,C}| |
+		-- |   |                                      |[4]| c        {C}    | |
+		-- |   |                                      |[5]| ce       {C}    | |
+		-- |   |                                      +---+-----------------+ |
+		-- |   |                                                              |
+		-- |[2]| OclUndefined {}      {}              +---+-----------------+ |
+		-- |   |                                      | \ | property owners | |
+		-- |   |                                      +---+-----------------+ |
+		-- |   |                                      |[1]| de1      {D,E}  | |
+		-- |   |                                      |[2]| de2      {A,B}  | |
+		-- |   |                                      |[3]| d        {D}    | |
+		-- |   |                                      |[4]| ce       {E}    | |
+		-- |   |                                      +---+-----------------+ |
+		-- +---+--------------------------------------------------------------+
+		
+helper def: f: OrderedSet(TupleType( 
+		parent:Class!Entity
+		,owners:OrderedSet(Class!Entity)
+		,middle:Class!Entity)) = OrderedSet {};
+
+		--               +--------------+           
+		--               + OclUndefined +           
+		--               +--------------+           
+		--              /                \           
+		--      +-------------+        +-----+
+		--      |      D      |        |  E  |
+		--      |-------------|        |-----|
+		--      |     de1     |        | de1 |
+		--      |     de2     |        | de2 |
+		--      +-------------+        +-----+
+		--     /       |       \           
+		-- +-----+  +-----+  +-----+   >> create middle class for common property 
+		-- |  A  |  |  B  |  |  C  |   >> Not create two middle class any time! 
+		-- |-----|  |-----|  |-----|   >> they are the same
+		-- | ab1 |  | ab1 |  |     |      
+		-- | ab2 |  | ab2 |  |     |
+		-- +-----+  +-----+  +-----+
+		--
+		-- +---+-----------------------------+
+		-- | f | parent       owners  middle |
+		-- +---+-----------------------------+
+		-- |[1]| D            {A,B}   AB     |
+		-- |[2]| OclUndefined {D,E}   DE     |
+		-- +---+-----------------------------+
+		
+helper def: h: OrderedSet(TupleType(
+		parent:Class!Entity
+		,child:Class!Entity
+		,visible:Boolean)) =
+	OrderedSet {};
+
+		-- +----+-----------------------+
+		-- | h  | parent child  visible |
+		-- +----+-----------------------+
+		-- |[ 1]| D      A      true    |
+		-- |[ 2]| D      B      true    |
+		-- |[ 3]| D      C      true    |
+		-- |[ 4]| D      AB     true    |
+		-- |[ 5]| AB     A      true    |
+		-- |[ 6]| D      A      false   |
+		-- |[ 7]| AB     B      true    |
+		-- |[ 8]| D      B      false   |
+		-- |[ 9]| DE     D      true    |
+		-- |[10]| DE     E      true    |
+		-- +----+-----------------------+
+rule CopyContainer {
+	from
+		c: Class!Container in IN
+	to
+		cOut: Class!Container in OUT
+	do {
+		thisModule.c <- c;
+		thisModule.cOut <- cOut;
+		
+		for(i in Class!Generalization.allInstancesFrom('IN'))
+		{
+			thisModule.gInitializeParent(i);
+		}
+		
+		thisModule.g <- 
+			thisModule.g.including(Tuple{parent=OclUndefined, parents=OrderedSet{}, parentsProperty=OrderedSet{}, commons=OrderedSet{}});
+		
+		for(i in Class!Generalization.allInstancesFrom('IN'))
+		{
+			thisModule.gInitializeParents(i);
+		}
+	}
+}
+
+rule gInitializeParent(g:Class!Generalization){
+	do {
+		for(i in g.specific.specialisation)
+		{
+			thisModule.gInitializeParent(i);
+		}
+
+		thisModule.g <- 
+			thisModule.g.including(Tuple{parent=g.general, parents=OrderedSet{}, parentsProperty=OrderedSet{}, commons=Set{}});
+	}
+}
+
+rule gInitializeParents(g:Class!Generalization){
+	do {
+		for(g1 in thisModule.g->select(s1|s1.parent=g.general))
+		{
+			for(i in g.general.generalisation)
+			{
+				thisModule.gInitializeParents(i);
+				for(g2 in thisModule.g->select(s2|s2.parent=i.general))
+				{
+					g1.parents <- g1.parents.including(g2.parents);
+					g1.parentsProperty <- g1.parentsProperty.union(g2.parentsProperty);
+				}
+			}
+			g1.parents <- g1.parents.including(g.general);
+			g1.parentsProperty <- g1.parentsProperty.union(g.general.Owned_Attribute);
+		}
+	}
+}
+
+rule CopyType {
+	from
+		t: Class!Type in IN
+	to
+		tOut: Class!Type  in OUT(
+			name <- if not thisModule.debugMode then '' else 'CopyType.' endif
+				.concat(t.name)
+		)
+	do {
+		thisModule.tt <- thisModule.tt.including(t, tOut); 
+		thisModule.cOut.NE <- thisModule.cOut.NE.including(tOut);
+	}
+}
+
+rule CopyProperty {
+	from
+		p: Class!Property in IN
+	using {
+		pOwner: Class!Entity = OclUndefined;
+		pParent: Class!Entity = OclUndefined;
+	}
+	to
+		pOut: Class!Property in OUT (
+			name <- if not thisModule.debugMode then '' else 'CopyProperty.' endif
+				.concat(p.name)
+			,type <- thisModule.tt.get(p.type)
+		)
+	do {
+		thisModule.pp <- thisModule.pp.including(p, pOut); 
+		thisModule.cOut.NE <- thisModule.cOut.NE.including(pOut);
+		for(pOwner in p.owned2)
+		{
+			if(pOwner.generalisation->size()=0)
+			{
+				thisModule.gInitializeCommons(OclUndefined, p, pOwner);
+			}
+			else for(pParent in pOwner.generalisation->collect(e|e.general)) 
+			{
+				thisModule.gInitializeCommons(pParent, p, pOwner);
+			}
+		}
+	}
+}
+
+rule gInitializeCommons(parent:Class!Entity, property:Class!Property, owner:Class!Entity){
+	using{
+		propertyFounded:Boolean=false;
+	}
+	do {
+		for(i in thisModule.g->select(s1|s1.parent=parent))
+		{
+			if (i.parentsProperty->select(s3|s3=property)->size()=0)
+			{
+				propertyFounded<-false;
+				for(j in i.commons->select(s2|s2.property=property))
+				{
+					propertyFounded<-true;
+					j.owners <- j.owners.including(owner);
+				}
+				if(not propertyFounded)
+					i.commons <- i.commons.including(Tuple{property=property, owners=OrderedSet{owner}});
+			}
+		}
+	}
+}
+
+rule CopyEntity {
+	from
+		e: Class!Entity in IN
+	to
+		eOut: Class!Entity in OUT (
+			name <- if not thisModule.debugMode then '' else 'CopyEntity.' endif
+				.concat(e.name)
+		)
+	do {
+		thisModule.ee <- thisModule.ee.including(e, eOut);
+		thisModule.cOut.NE <- thisModule.cOut.NE.including(eOut);
+	}
+}
+
+nodefault rule AssignPropertyAndGeneralization { -- skip  duplicated rule error
+	from
+		c: Class!Container in IN --just called once
+	using {
+		eOut:Class!Entity=OclUndefined; --declare variable
+		gOut:Class!Generalization=OclUndefined; --declare variable
+	}
+	do {
+		-- insert all genralization from Our input model to h variable.
+		for(generalization in Class!Generalization.allInstancesFrom('IN')) 
+		{
+			thisModule.h <- thisModule.h.including(Tuple{ -- step a from h <<powerpoint Slide>>
+				parent=thisModule.ee.get(generalization.general)
+				,child=thisModule.ee.get(generalization.specific)
+				,visible=true});
+		}
+		for(gRow in thisModule.g) -- g >> each gRow 
+		{
+			for(commons_item in gRow.commons) -- gRow.commons >> commons_item
+			{
+				-- not mergable common property | look up the all property that have one owners in g at all
+				if(commons_item.owners->size()=1) 
+				{	
+					-- create a local variable "owner" and after that destoryed | for loop is just running once
+					for(owner in commons_item.owners)  
+					{
+						thisModule.pp.get(commons_item.property).owned2 <- 
+							thisModule.pp.get(commons_item.property).owned2.including(thisModule.ee.get(owner));
+					}
+				}
+				-- from this part I look at the property that have more than one owner, 
+				-- check the parent that has null value like: g[4] that is covers root entityes
+				-- create a middle class as new parent of owners
+				-- create multiple generalization between owners and middle class
+				else if(gRow.parent.oclIsUndefined())
+				{
+					eOut <- OclUndefined;
+					-- monitor the owner from f , check if this owners that have common property and create middle class before for it
+					for(fRow in thisModule.f->select(s1|s1.parent=gRow.parent and s1.owners=commons_item.owners))
+					{
+						eOut <- fRow.middle; -- take middle class from output model for these owners
+						eOut.name <- eOut.name.concat('.').concat(commons_item.property.name);
+					}
+					if(eOut.oclIsUndefined()) -- if middle class not created before, at now we want to create it
+					{
+						eOut <- (Class!Entity).newInstanceIn('OUT');
+						eOut.name <- if not thisModule.debugMode then '' else 'common.' endif
+							.concat(commons_item.owners->iterate(i;x:String=''|x.concat(i.name)))
+							.concat(if not thisModule.debugMode then '' else '.'.concat(commons_item.property.name) endif);
+						thisModule.f <- thisModule.f.including(Tuple{  -- register middle class inside f for reusing it, if needed. 
+							parent=gRow.parent
+							,owners=commons_item.owners
+							,middle=eOut});
+						thisModule.cOut.NE <- thisModule.cOut.NE.including(eOut); -- make this middle class as child of container.
+					}
+					for(owner in commons_item.owners) 
+					{
+						thisModule.h <- thisModule.h.including(Tuple{ -- step C from h <<powerpoint Slide>>
+							parent=eOut
+							,child=thisModule.ee.get(owner)
+							,visible=true});
+					}
+					
+					thisModule.pp.get(commons_item.property).owned2 <- 
+						thisModule.pp.get(commons_item.property).owned2.including(eOut); --{{!}}
+				}
+				-- create a middle class as new parent of owners
+				-- create multiple generalization between owners and middle class
+				-- create one generalization between middle class and parent
+				-- delete multiple generalization between owners and parent
+				else if(commons_item.owners->size() < gRow.parent.specialisation->size())
+				{
+					eOut <- OclUndefined;
+					for(fRow in thisModule.f->select(s2|s2.parent=gRow.parent and s2.owners=commons_item.owners)) -- LIKE THE BEFORE.
+					{
+						eOut <- fRow.middle;
+						eOut.name <- eOut.name.concat('.').concat(commons_item.property.name);
+					}
+					if(eOut.oclIsUndefined()) -- LIKE THE BEFORE.
+					{
+						eOut <- (Class!Entity).newInstanceIn('OUT');
+						eOut.name <- if not thisModule.debugMode then '' else 'common.' endif
+							.concat(commons_item.owners->iterate(i;x:String=''|x.concat(i.name)))
+							.concat(if not thisModule.debugMode then '' else '.'.concat(commons_item.property.name) endif);
+						thisModule.f <- thisModule.f.including(Tuple{
+							parent=gRow.parent
+							,owners=commons_item.owners
+							,middle=eOut});
+						thisModule.cOut.NE <- thisModule.cOut.NE.including(eOut); 
+					}
+
+					thisModule.h <- thisModule.h.including(Tuple{	-- create one generalization between middle class and parent
+						parent=thisModule.ee.get(gRow.parent)
+						,child=eOut
+						,visible=true});
+					
+					for(owner in commons_item.owners) -- LIKE THE BEFORE.
+					{
+						thisModule.h <- thisModule.h.including(Tuple{	-- create multiple generalization between owners and middle class
+							parent=eOut
+							,child=thisModule.ee.get(owner)
+							,visible=true});
+
+						thisModule.h <- thisModule.h.including(Tuple{	-- delete multiple generalization between owners and parent
+							parent=thisModule.ee.get(gRow.parent)
+							,child=thisModule.ee.get(owner)
+							,visible=false});
+					}
+					thisModule.pp.get(commons_item.property).owned2 <- thisModule.pp.get(commons_item.property).owned2.including(eOut);
+					
+				}
+				-- mov property to parent
+				else if(commons_item.owners->size() = gRow.parent.specialisation->size()) 
+				{
+					thisModule.pp.get(commons_item.property).owned2 <- 
+						thisModule.pp.get(commons_item.property).owned2.including(thisModule.ee.get(gRow.parent)); --{{!}}
+				}
+			}
+		}
+		-- apply registered generalization inside h
+		for(hRow in thisModule.h) 
+		{
+			if(thisModule.h->iterate(i;x:Boolean=true|
+				if i.parent=hRow.parent 
+					and i.child=hRow.child
+				then x and i.visible else x endif)) -- only apply that register generalization that not exists "visible" = "False"
+			{
+				gOut <- (Class!Generalization).newInstanceIn('OUT');
+				gOut.general <- hRow.parent;
+				gOut.specific <- hRow.child;
+				gOut.name <- if not thisModule.debugMode then '' else 
+					gOut.specific.name
+					.concat(' --|> ')
+					.concat(gOut.general.name)
+					endif;
+
+				thisModule.cOut.gr <- thisModule.cOut.gr.including(gOut);
+			}
+		}
+	}
+}

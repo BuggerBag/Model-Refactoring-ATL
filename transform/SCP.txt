@@ -1,0 +1,453 @@
+﻿rule rule1{
+	c:Entity;
+	:SuperOf(c,g1);
+	:SuperOf(c,g2);
+	g1:Entity−:Owned_Attribute−>a1:Property−:type−>t:Type;
+	g2:Entity−:Owned_Attribute−>a2:Property;
+	:SameAttribute(a1,a2);
+	negative{
+		g3:Entity;
+		:SuperOf(c,g3);
+		g1;
+		negative{
+			g3−:Owned_Attribute−>a3:Property;
+			:SameAttribute(a1,a3);
+		}
+	}
+	modify{
+		c−:Owned_Attribute−>a4:Property−:type−>t;
+		eval{
+			a4._name=a1._name;
+		}
+		exec(RemoveAttributeFromSubclasses(c,a4);>[createInverseEdges]);
+	}
+}
+
+
+
+
+
+pattern SameAttribute(a1:Property,a2:Property){
+	independent{
+		if{a1._name==a2._name;}
+		a1−:type−>t:Type<−:type−a2;
+	}
+}
+pattern SuperOf(c1:Entity,c2:Entity){
+	c1−:specialisation−>:Generalization−:specific−>c2;
+}
+
+
+
+
+
+rule RemoveAttributeFromSubclasses(c:Entity,attr:Property){
+	iterated{
+		c−:specialisation−>:Generalization−:specific−>g:Entity−:Owned_Attribute−>a:Property;
+		:SameAttribute(a,attr);
+		modify{
+			delete(a);
+		}
+	}
+}
+
+
+
+
+
+rule rule2{
+	c:Entity;
+	:SuperOf(c,g1);:SuperOf(c,g2);
+	g1:Entity−:Owned_Attribute−>a1:Property−:type−>t:Type;
+	g2:Entity−:Owned_Attribute−>a2:Property;
+	:SameAttribute(a1,a2);
+
+	g3:Entity;
+	:SuperOf(c,g3);
+	negative{
+		g3−:Owned_Attribute−>a3:Property;
+		:SameAttribute(a1,a3);
+	}
+	modify{
+		c−:specialisation−>:Generalization−:specific−>c1:Entity;
+		c1−:Owned_Attribute−>a4:Property−:type−>t;
+		eval{
+			a4._name=a1._name;
+		}
+		exec(AddIntermediateClassAndRemoveAttributeFromSubclasses(c,a4,c1);>[createInverseEdges]);
+	}
+}
+
+
+
+
+
+rule AddIntermediateClassAndRemoveAttributeFromSubclasses(super:Entity,attr:Property,intermediate:Entity){
+	iterated{
+		super−:specialisation−>gOld:Generalization−:specific−>g:Entity−:Owned_Attribute−>a:Property;
+		intermediate;//<>super<>g
+		:SameAttribute(a,attr);
+		modify{
+			delete(gOld);
+			intermediate−:specialisation−>gNew:Generalization−:specific−>g;
+			delete(a);
+		}
+	}
+}
+
+
+
+
+
+rule rule3{
+	:IsRoot(g1);:IsRoot(g2);
+	g1:Entity−:Owned_Attribute−>a1:Property−:type−>t:Type;
+	g2:Entity−:Owned_Attribute−>a2:Property;
+	:SameAttribute(a1,a2);
+	modify{
+		c:Entity−:Owned_Attribute−>a3:Property−:type−>t;
+		eval{
+			a3._name=a1._name;
+		}
+		exec(AttributeToRootClassesAndMakeSubclass(a3,c);>[createInverseEdges]);
+	}
+}
+
+
+
+
+
+pattern IsRoot(root:Entity){
+	negative{
+		.−:specific−>root;
+	}
+}
+rule AttributeToRootClassesAndMakeSubclass(attr:Property,super:Entity){
+	iterated{
+		:IsRoot(root);root:Entity;
+		root−:Owned_Attribute−>a:Property;
+		super;//super<>root
+		:SameAttribute(a,attr);
+		modify{
+			super−:specialisation−>gNew:Generalization−:specific−>root;
+			delete(a);
+		}
+	}
+}
+
+
+
+
+
+var leafNodes:Set<String>init Set<String>.new
+root.Eelement.select{e|e.isInstanceOf(Entity)}.each{c|
+	var cl:Entity
+	cl?=c
+	if cl.specialisation.size()==0 then
+	leafNodes.add(cl.name)
+	end
+}
+
+
+
+
+
+var procNodes:Set<String>init Set<String>.new
+var r1:Rule1 init Rule1.new
+r1.root:=model.clone(root)
+nodes.each{cs|
+	var c:Entity
+	c:=r1.root.getClassFromString(cs)
+	c.specialisation.each{p|
+		var fd:Boolean init true
+		procNodes.each{pc|
+			if p.specific.name==pc and p.specific.done1==void then
+				fd:=false
+			end
+		}
+		if fd then
+			procNodes.add(p.specific.name)
+		end
+	}
+}
+nodes.each{cs|
+	var c:Entity
+c:=r1.root.getClassFromString(cs)
+	c.generalisation.each{g|
+		var cl:Entity
+		cl:=g.general
+		r1.ProcessSuper(cl)
+		cl.done1:=1
+		}
+}
+
+
+
+
+
+var propSet:Set<Set<Property>>init Set<Set<Property>>.new
+c.specialisation.each{s|
+	var sc:Entity
+sc:=s.specific
+	var prop:Set<Property>init Set<Property>.new
+	sc.Owned_Attribute.each{p|prop.add(p)}
+	propSet.add(prop)
+}
+var iset:Set<Property>
+iset:=Process(propSet)
+if iset.size()>0 then
+	stdio.writeln("Common Properties")
+	addPropertiesSuper(c,iset)
+	remPropertiesChildren(c,iset)
+else
+	stdio.writeln("No Common Properties")
+end
+
+
+
+
+
+stdio.writeln("Processing General:"+cl.name)
+var children:Set<Entity>init cl.getChildren()
+var clsMgr:ClassMgr init ClassMgr.new
+children.each{c1|
+	clsMgr.newSet(c1)
+	children.each{c2|
+		if c1.name!=c2.name then
+			if c1.checkCommon(c2)then
+				stdio.writeln("Common found")
+				clsMgr.addClass(c1,c2)
+			end
+		end
+	}
+}
+stdio.writeln("Processing Containers")
+var cont:Container
+cont:=clsMgr.getLargestSet()
+if cont.data.size()>0 then
+	processProperties(cont,cl)
+	processRemProperties(cont,cl)
+end
+
+
+
+
+
+var r1:Rule1 init Rule1.new
+r1.root:=model.clone(root)
+if r1.ProcessClasses(nodes).size()>0 then
+	var name:String init""
+	nodes.each{p|name.append(p)}
+	var newClass:Entity init Entity.new
+	newClass.name:=name
+	nodes.each{cs|
+		var c:Class
+		c:=root.getClassFromString(cs)
+		var spec:Generalization init Generalization.new
+		spec.general:=newClass
+		spec.specific:=c
+		root.ERelation.add(spec)
+		c.generalisation.add(spec)
+	}
+	r1.ProcessSuper(newClass)
+	root.Eelement.add(newClass)
+	root:=model.clone(r1.root)
+end
+var r3:Rule3 init Rule3.new
+r3.root:=model.clone(root)
+r3.ProcessClass(nodes)
+root:=model.clone(r3.root)
+
+
+
+
+
+rule Copygeneralization{
+	from
+		g:Class!Generalization
+	to
+		gOut:Class!Generalization(
+			specific<−g.specific,
+			general<−g.general
+	)
+}
+
+rule CopyType{
+	from
+		t:Class!Type
+	to
+		tOut:Class!Type(
+			name<−t.name
+		)
+}
+
+
+
+
+
+−−This rule copies properties(allofthem)fromclass eswhichare not
+−−subclasses.
+rule CopyPropertiesNonSubclasses{
+	from
+		p:Class!Property,
+		c:Class!Entity(c.Owned_Attribute−>includes(p)and
+			c.generalisation−>size()=0)
+	to
+		pOut:Class!Property(
+			name<−p.name,
+			type<−p.type
+		)
+}
+
+
+
+
+
+−−This rule copies those properties belonging to subclasses which are
+−−not repeated in all the subclasses of a class.
+rule CopyPropertiesSubclasses{
+	from
+		p:Class!Property,
+		c:Class!Entity,
+		cSup:Class!Entity(c.Owned_Attribute−>includes(p)and
+			c.generalisation−>exists(g|g.general=cSup)and
+			cSup.specialisation−>exists(g|not
+			g.specific.Owned_Attribute−>exists(pr|pr.name=p.name)))
+	to
+		pOut:Class!Property(
+			name<−p.name,
+			type<−p.type
+		)
+}
+
+
+
+
+
+−−This rule copies all the classes and adds to those new
+−−classes those attributes created by rules CopyPropertiesSubclasses
+−−and CopyPropertiesNonSubclasses,when it corresponds.Besides,
+−−it adds new attributes in a superclass when it corresponds.
+rule CopyClasses{
+	from
+		c:Class!Entity
+	to
+		cOut:Class!Entity(
+			name<−c.name,
+			generalisation<−c.generalisation,
+			specialisation<−c.specialisation
+		)
+	do{
+		−−If c is not a subclass,all the attributes are copied by
+		−−rule CopyPropertiesNonSubClasses,so we make the new
+		−−class contain them
+		if(c.generalisation−>size()=0){
+			cOut.Owned_Attribute<−c.Owned_Attribute;
+		}else{
+			−−If c is a subclass,those attributes not repeated in it's
+			−−siblings are copied by rule CopyPropertiesSubclasses,
+			−−so we add them here.
+			−−We assume there is not multiple inheritance
+			thisModule.cSup<−c.generalisation−>first().general;
+			for(p in c.Owned_Attribute){
+				if(thisModule.cSup.specialisation−>exists(g|
+				not g.specific.Owned_Attribute−>exists(pr|pr.name
+				=p.name))){
+					cOut.Owned_Attribute<−cOut.Owned_Attribute−>append(p);
+				}
+			}
+		}
+		−−Furthermore,if c is a superclass,we create a new attributee in
+		−−it if all it's subclasses contain an attributee with the same
+		−−name and type
+		if(c.specialisation−>size()>0){
+			for(p in c.specialisation−>first().specific.Owned_Attribute){
+				if(c.specialisation−>forAll(g|g.specific.Owned_Attribute
+				−>exists(pr|pr.name=p.name and pr.type=p.type))){
+					−−A call to lazy rule CreateProperty is made
+					cOut.Owned_Attribute<−cOut.Owned_Attribute−>
+					append(thisModule.CreateProperty(p));
+				}
+			}
+		}
+	}
+}
+
+
+
+
+
+−−lazy rule that copies the property received as argument
+lazy rule CreateProperty{
+	from
+		p:Class!Property
+	to
+		pOut:Class!Property(
+			name<−p.name,
+			ty pe<−p.type
+	)
+}
+
+
+
+
+
+transformation QualityImprovement(source:KCL,target:KCL)
+{
+	top relation TakeGeneralization{
+		checkonly domain source sourcegen:KCL::Generalization{
+			specific=sub:KCL::Entity{
+				Owned_Attribute=prop:KCL::Property{}}};
+		enforce domain target targetgen:KCL::Generalization{};
+		when{sourcegen.general.specialisation.size()>1 and
+			sourcegen.general.specialisation−>exists(
+			c|c.specific.name<>sub.name and
+			c.specific.Owned_Attribute−>exists(
+			p|p.name=prop.name and p.type.name=prop.type.name));}
+		where{CheckRule1(sourcegen,targetgen);}
+	}
+}
+
+
+
+
+relation CheckRule1{
+	checkonly domain source sourcegen:KCL::Generalization{
+		specific=subsource:KCL::Entity{
+			Owned_Attribute=prop:KCL::Property{}}};
+	enforce domain target targetgen:KCL::Generalization
+	{specific=subtarget:KCL::Entity{}};
+	when{sourcegen.general.specialisation.size()>1 and
+		sourcegen.general.specialisation−>exists(
+		c|c.specific.name<>subsource.name
+		and
+		not c.specific.Owned_Attribute−>exists(
+		p|p.name<>prop.name));}
+	where{CopyGeneralisationForRule1(sourcegen,targetgen)and
+		CopyClass(subsource,subtarget);}
+}
+
+
+
+
+
+relation CopyGeneralisationForRule1{
+	checkonly domain source sourcegen:KCL::Generalization{};
+	enforce domain target targetgen:KCL::Generalization{};
+}
+
+
+
+
+
+top relation TakesuperClass{
+	checkonly domain source s:KCL::Entity{
+		specialisation=spsourcesuper:KCL::Generalization{
+			specific=spe:KCL::Entity{
+				Owned_Attribute=prop:KCL::Property{}}}};
+	enforce domain target t:KCL::Entity{
+		specialisation=sptargetsuper:KCL::Generalization{},
+		Owned_Attribute=prop:KCL::Property{}};
+	when{CopyGeneralisationForRule1(spsourcesuper,sptargetsuper);}
+	where{CopyClass(s,t);}
+}
